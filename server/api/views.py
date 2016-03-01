@@ -19,6 +19,17 @@ def index(request):
         application_url = request.POST.get('application_url')
         username = request.POST.get('username')
         password = request.POST.get('password')
+        if not username or not password:
+            try:
+                dirty_data = request.POST.keys()[0]
+                data = json.loads(dirty_data)
+                username = data['username']
+                password = data['password']
+                application_url = data.get('application_url')
+            except:
+                raise Http404
+    else:
+        raise Http404
 
     is_setting_up = False
     if all([application_url, username, password]):
@@ -29,7 +40,7 @@ def index(request):
         except ApplicationURL.DoesNotExist:
             raise Http404
 
-    jira = JIRA(server=application_url, basic_auth=(username, password))
+    jira = JIRA(server=application_url, basic_auth=(username, password), max_retries=1)
     cache_time_to_live = 1000 # Seconds
     cache.set(username, jira, cache_time_to_live)
     available_projects = jira.projects()
@@ -46,12 +57,25 @@ def index(request):
             'name': project.name,
         }
         data.append(project_data)
-    data = json.dumps(data)
-    return HttpResponse(data)
+    data = {
+        'projects': data,
+        'token': username
+    }
+    data = json.dumps([data])
+    # import ipdb
+    # ipdb.set_trace()
+    response = HttpResponse(data)
+    response["Access-Control-Allow-Origin"] = "*"
+    response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
+    response["Access-Control-Max-Age"] = "1000"
+    response["Access-Control-Allow-Headers"] = "*"
+    return response
 
 def project_statistics(request, project_id):
 
     user_name = request.GET.get('username')
+    #import ipdb
+    #ipdb.set_trace()
     if user_name is None:
         raise Http404
     jira = cache.get(user_name)
@@ -68,11 +92,11 @@ def project_statistics(request, project_id):
             release_date = version.releaseDate
         else:
             release_date = None
-        versiod_data = {
+        version_data = {
             'name': version.name,
             'release_date': release_date,
         }
-        versions.append(versiod_data)
+        versions.append(version_data)
 
     issues = jira.search_issues('project='+str(project_id))
 
@@ -131,9 +155,19 @@ def project_statistics(request, project_id):
     }
 
     data = {
+        'project_info': {
+            'name': project.name,
+            'id': project.id,
+        },
         'issues_data': issues_data,
         'user_data': users,
-        'project_verions': versions,
+        'project_versions': versions,
     }
     data = json.dumps([data])
-    return HttpResponse(data)
+    #return HttpResponse(data)
+    response = HttpResponse(data)
+    response["Access-Control-Allow-Origin"] = "*"
+    response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
+    response["Access-Control-Max-Age"] = "1000"
+    response["Access-Control-Allow-Headers"] = "*"
+    return response
