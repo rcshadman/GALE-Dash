@@ -1,0 +1,93 @@
+<ion-view view-title="Dashboard" ng-controller='dashboardCtrl' ng-model='project' ng-cloak>
+  <ion-content>
+    <!-- <div class="item item-divider positive"></div> -->
+    
+    <div class="row">
+        
+        <div id="daystolive" class="col col-100 card">
+                
+            <div class='row'>
+                <div class="col col">
+                    <h1 class="title" style="color:#707070!important" >{{project.name}}</h1>
+                </div>
+            </div>
+            <div class='row'>    
+                <div class='col'>
+                    <div class="item item-icon-left">
+                        <i class="icon ion-paper-airplane royal"></i> Days To Live : <b style="color:#707070!important">{{ project.daysToLive }}</b>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+    <div id="Graph" class="row">
+           <div id="Graph" class="col col-100">
+                    
+                <ion-scroll direction="x" > 
+                    <div class="item" style="width:8000px;">
+                        <nvd3 options="options" data="data"></nvd3>
+                    </div>
+                </ion-scroll>
+                    
+            </div>
+        </div>
+    <div id="content" class="row">
+        <div class="col col-70 ">
+            <div id="Numbers" class="row">
+                
+                <div id="Open" class="col">
+                    <div class="list">
+                        <li class='item'>
+                            <i class="icon ion-thumbsdown assertive"></i><i class="dark"> Open</i>
+                        </li>
+                        <li class=" item item-text-wrap">
+                            <b style="color:#707070!important">{{ project.open }}</b>
+                        </li>
+                    </div>
+                </div>
+            </div>
+            <div id="Numbers" class="row">
+                <div id="Resolved" class="col">
+                    
+                    
+                    <div class="list">
+                        <li class='item balanced'>
+                            <i class="icon ion-thumbsup balanced"></i><i class="dark"> Fixed</i>
+                        </li>
+                        <li class=" item item-text-wrap">
+                            <b style="color:#707070!important">{{ project.fixed }}</b>
+                        </li>
+                    </div>
+                </div>
+                
+
+            </div>
+            <!-- graph was here -->
+        </div>
+        <div class="col-30 "  style="margin-top:-1% !important">
+            
+            <div class="list card " scroll="true" >
+                <a href="" class="item ">
+                <i class="icon ion-person positive"></i> Tickets
+                </a>
+                <a ng-repeat='(name,user_data) in project.ticketList' href="#" class="item item-text-wrap" style="color:#707070!important">
+                 {{name|limitTo:14}} 
+                 <i class="balanced">{{user_data.resolved}}</i> / <i class="assertive">{{user_data.unresolved}}</i>
+                </a>
+                
+                
+            </div>
+           
+            
+
+        </div>
+    </div>
+    
+
+  </ion-content>
+</ion-view>
+
+
+
